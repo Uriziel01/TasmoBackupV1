@@ -230,16 +230,17 @@ $(document).ready(function() {
 		echo '<img src="images/lock-open-variant.png"></picture>';
 	    }
 	}
-        $ver=$version;
-        $tag='';
-        $release_html = '';
-        if(($pos=strpos($version,'('))>0) {
-            $ver=substr($version,0,$pos);
-            $tag=substr($version,$pos);
-            $version=$ver.' <small>'.$tag.'</small>';
+	$is_valid_version = preg_match('/^(?<major>\d+).(?<minor>\d+).(?<patch>\d+).?(?<build>\d*)\((?<tag>[[:alnum:]]+)\)$/', $version, $parsed_version);
+        if($is_valid_version) {
+            $version= "{$parsed_version['major']}.{$parsed_version['minor']}.{$parsed_version['patch']}";
+	    if($parsed_version['build']){
+		    $version .= ".{{$parsed_version['build']}";
+	    }
+	    $version .= " <small>{$parsed_version['tag']}</small>";
+	    $available_tags = ['tasmota','lite','sensors','display','ir','knx','zbbridge','webcam','bluetooth','core2'];
 
-            if ( in_array($tag,array('(tasmota)','(lite)','(sensors)','(display)','(ir)','(knx)','(zbbridge)','(webcam)','(bluetooth)','(core2)')) ) {
-                $github_tag_name = 'v' . $ver;
+            if (in_array($parsed_version['tag'],$available_tags)) {
+                $github_tag_name = "v{$parsed_version['major']}.{$parsed_version['minor']}.{$parsed_version['patch']}";
                 foreach ( $github_tasmota_release_data as $release => $values ) {
                     $url = $values['html_url'];
                     if ( $values['tag_name'] == $github_tag_name ) {
